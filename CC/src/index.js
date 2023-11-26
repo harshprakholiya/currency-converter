@@ -5,7 +5,6 @@ FIXER API Data Example
     "AFN": 75.761389,
     "ALL": 102.338368,
     "AMD": 439.150086,
-   
 }
 
 */
@@ -20,19 +19,34 @@ const REST_COUNTRIES_API = `https://restcountries.com/v3.1/currency`;
 
 
 const getExchangedRate = async (fromCurrency, toCurrency) => {
-    const {data: {rates}} = await axios.get(FIXER_API);
-    // console.log(rates.INR);
+    const { data: { rates } } = await axios.get(FIXER_API);
     const euro = 1/rates[fromCurrency];
     const exchangeRate = euro * rates[toCurrency];
     return exchangeRate;
-
-
 }
 // getExchangedRate('USD', 'INR');
 
 const getCountries = async (countryCode) => {
-    const {data} = await axios.get(`${REST_COUNTRIES_API}/${countryCode}`)
-    // console.log(data);
-    console.log(data.map((country) => country.name));
+    const { data } = await axios.get(`${REST_COUNTRIES_API}/${countryCode}`)
+    return data.map((country) => country.name);
 }
-getCountries('INR');
+// getCountries('INR');
+
+const convertCurrency = async (fromCurrency, toCurrency, amount) => {
+
+    const fCurrency = fromCurrency.toUpperCase();
+    const tCurrency = toCurrency.toUpperCase();
+
+    const [ countries, exchangeRate] = await Promise.all([
+
+        getCountries(fCurrency),
+        getExchangedRate(fCurrency, tCurrency)
+
+    ])
+
+    console.log(exchangeRate);
+    return `converted amount is ${( amount * exchangeRate).toFixed(2)}`;
+   
+}
+
+convertCurrency('inr','usd', 100).then((result) => console.log(result));
